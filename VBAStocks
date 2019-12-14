@@ -1,0 +1,118 @@
+sub vbaHomework()
+
+'Loop over multiple worksheets and add appropriate headers
+For Each ws In Worksheets
+    ws.Cells(1, 9).Value = "Ticker"
+    ws.Cells(1, 16).Value = "Ticker"
+    ws.Cells(1, 10).Value = "Yearly Change"
+    ws.Cells(1, 11).Value = "Percent Change"
+    ws.Cells(1, 12).Value = "Total Stock Volume"
+    ws.Cells(1, 17).Value = "Value"
+    ws.Cells(2, 15).Value = "Greatest % Increase"
+    ws.Cells(3, 15).Value = "Greatest % Decrease"
+    ws.Cells(4, 15).Value = "Greatest Total Volume"
+    
+'Declare all relevant variables 
+Dim i As Long
+Dim ticker As String
+Dim year_open As Double
+Dim vol As Double
+vol = 0
+Dim yearChange As Double
+yearChange = 0
+Dim pChange As Double
+Dim summary_row As Long
+summary_row = 2
+Dim lastRow As Long
+lastRow = ws.Cells(Rows.Count, 1).End(xlUp).Row
+
+'loop to check every row for different ticker symbol and get info.
+For i = 2 To lastRow
+year_open = ws.Cells(summary_row, 3).Value
+
+'conditional statement to check if ticker symbols are different
+    If ws.Cells(i + 1, 1).Value <> ws.Cells(i, 1).Value Then
+        'ticker placement
+        ticker = ws.Cells(i, 1).Value
+        ws.Range("I" & summary_row).Value = ticker
+    
+        yearChange = yearChange + (ws.Cells(i, 6).Value - year_open)
+        ws.Range("J" & summary_row).Value = yearChange
+    
+        pChange = (yearChange / year_open)
+        ws.Range("K" & summary_row).Value = pChange
+        ws.Range("K" & summary_row).Style = "Percent"
+        
+        vol = vol + ws.Cells(i, 7).Value
+        ws.Range("L" & summary_row).Value = vol
+        
+        'Reset values for next pass of loop
+        summary_row = summary_row + 1
+        yearChange = 0
+        vol = 0
+        year_open = ws.Cells(summary_row, 3).Value
+    Else
+        vol = vol + ws.Cells(i, 7).Value
+    End If
+Next i
+
+'Declare variables for cell formatting
+Dim yearLastRow As Long
+yearLastRow = ws.Cells(Rows.Count, 10).End(xlUp).Row
+
+'Add Loop for conditional color formatting
+For i = 2 To yearLastRow
+
+'Add Conditional for cell formatting
+    If ws.Cells(i, 10).Value >= 0 Then
+        ws.Cells(i, 10).Interior.ColorIndex = 4
+    Else
+        ws.Cells(i, 10).Interior.ColorIndex = 3
+    End If
+Next i
+    
+'Declare variables for finding bonus
+Dim percentLastRow As Long
+percentLastRow = ws.Cells(Rows.Count, 11).End(xlUp).Row
+Dim percent_max As Double
+percent_max = 0
+Dim percent_min As Double
+percent_min = 0
+
+'loop to find max and min
+For i = 2 To percentLastRow
+
+'conditional statement to test max/ min
+    If percent_max < ws.Cells(i, 11).Value Then
+        percent_max = ws.Cells(i, 11).Value
+        ws.Cells(2, 17).Value = percent_max
+        ws.Cells(2, 17).Style = "Percent"
+        ws.Cells(2, 16).Value = ws.Cells(i, 9).Value
+    ElseIf percent_min > ws.Cells(i, 11).Value Then
+        percent_min = ws.Cells(i, 11).Value
+        ws.Cells(3, 17).Value = percent_min
+        ws.Cells(3, 17).Style = "Percent"
+        ws.Cells(3, 16).Value = ws.Cells(i, 9).Value
+    End If
+Next i
+
+'Declare variable for greatest total volume
+Dim volumeRow As Long
+volumeRow = ws.Cells(Rows.Count, 12).End(xlUp).Row
+Dim volumeMax As Double
+volumeMax = 0
+
+'Add Loop for finding greatest total volume
+For i = 2 To volumeRow
+
+'Add Conditional for greatest total volume
+    If volumeMax < ws.Cells(i, 12).Value Then
+        volumeMax = ws.Cells(i, 12).Value
+        ws.Cells(4, 17).Value = volumeMax
+        ws.Cells(4, 16).Value = ws.Cells(i, 9).Value
+    End If
+Next i
+    
+Next ws
+
+end sub
